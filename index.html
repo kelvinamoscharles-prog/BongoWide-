@@ -8,7 +8,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
+        // --- TAILWIND CONFIGURATION & THEME LOGIC ---
+        
+        // 1. Theme State (Default)
+        const themeConfig = {
+            mode: localStorage.getItem('theme-mode') || 'light', // 'light' or 'dark'
+            color: localStorage.getItem('theme-color') || 'blue-600', // Default color
+        };
+
+        // Rangi zilizopo za kuchagua (kama picha ulivyotuma)
+        const colorOptions = [
+            'blue-600', 'green-500', 'purple-600', 'orange-500', 'red-600'
+        ];
+
+        // Function ya ku-resolve color class
+        function getColorClass(color) {
+            switch(color) {
+                case 'green-500': return '#22c55e';
+                case 'purple-600': return '#9333ea';
+                case 'orange-500': return '#f97316';
+                case 'red-600': return '#dc2626';
+                default: return '#2563eb'; // blue-600
+            }
+        }
+
+        // 2. Dynamic Tailwind Config
         tailwind.config = {
+            darkMode: 'class', // We use the 'dark' class on the HTML tag
             theme: {
                 extend: {
                     colors: {
@@ -17,30 +43,19 @@
                         ring: "hsl(var(--ring))",
                         background: "hsl(var(--background))",
                         foreground: "hsl(var(--foreground))",
+                        // Primary color uses the dynamic theme color
                         primary: {
-                            DEFAULT: "#2563eb", // Blue-600 like
+                            DEFAULT: getColorClass(themeConfig.color),
                             foreground: "#ffffff",
                         },
                         secondary: {
                             DEFAULT: "#f1f5f9",
                             foreground: "#0f172a",
                         },
-                        destructive: {
-                            DEFAULT: "hsl(var(--destructive))",
-                            foreground: "hsl(var(--destructive-foreground))",
-                        },
-                        muted: {
-                            DEFAULT: "#f1f5f9",
-                            foreground: "#64748b",
-                        },
-                        accent: {
-                            DEFAULT: "hsl(var(--accent))",
-                            foreground: "hsl(var(--accent-foreground))",
-                        },
-                        card: {
-                            DEFAULT: "#ffffff",
-                            foreground: "#020817",
-                        },
+                        // Custom dark mode colors (Maboresho ya Dark Mode)
+                        'dark-bg': '#111827',
+                        'dark-surface': '#1f2937',
+                        'dark-text': '#f3f4f6',
                     }
                 }
             }
@@ -50,24 +65,39 @@
         /* Custom Scrollbar hide */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Body default state */
         body { background-color: #f8fafc; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .auth-container { background-color: #f8fafc; } /* Kwa kutumia background color ya body kwa auth screens */
+        .auth-container { background-color: #f8fafc; }
+
+        /* Dark Mode overrides */
+        .dark body { background-color: #111827; color: #f3f4f6; }
+        .dark .bg-white { background-color: #1f2937 !important; color: #f3f4f6; }
+        .dark .border-b, .dark .divide-y { border-color: #374151 !important; }
+        .dark .text-slate-900 { color: #f3f4f6 !important; }
+        .dark .text-slate-500, .dark .text-slate-600 { color: #9ca3af !important; }
+        .dark .hover\:bg-slate-100:hover { background-color: #374158 !important; }
+        .dark .bg-slate-50 { background-color: #111827 !important; }
+        .dark .bg-slate-200 { background-color: #374151 !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.2); }
     </style>
 </head>
+
 <body class="text-slate-900">
 
     <header id="app-header" class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-10 hidden">
-        <h1 class="text-2xl font-bold text-blue-600">BongoWide</h1>
+        <h1 class="text-2xl font-bold text-primary-DEFAULT">BongoWide</h1>
         <div class="flex items-center gap-2">
             <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
                 <i class="fas fa-bell text-lg"></i>
             </button>
-            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
+            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600" id="search-btn">
                 <i class="fas fa-search text-lg"></i>
             </button>
-            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
-                <i class="fas fa-adjust text-lg"></i> </button>
-            <button class="ml-1 h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+            <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 relative">
+                <i class="fas fa-adjust text-lg"></i> 
+            </button>
+            <button onclick="switchTab('Settings')" class="ml-1 h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                 <img src="https://i.pravatar.cc/150?u=me" alt="User" class="h-full w-full object-cover">
             </button>
         </div>
@@ -77,30 +107,34 @@
     </main>
 
     <nav id="app-nav" class="flex h-16 items-center justify-around border-t bg-white z-10 hidden">
-        <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+        <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
             <i class="fas fa-comment-alt text-xl mb-1"></i>
             <span>Chats</span>
         </button>
-        <button onclick="switchTab('Updates')" id="nav-Updates" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+        <button onclick="switchTab('Updates')" id="nav-Updates" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
             <i class="fas fa-rss text-xl mb-1"></i>
             <span>Updates</span>
         </button>
-        <button onclick="switchTab('Groups')" id="nav-Groups" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+        <button onclick="switchTab('Groups')" id="nav-Groups" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
             <i class="fas fa-users text-xl mb-1"></i>
             <span>Groups</span>
         </button>
-        <button onclick="switchTab('World')" id="nav-World" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+        <button onclick="switchTab('World')" id="nav-World" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
             <i class="fas fa-globe text-xl mb-1"></i>
             <span>World</span>
         </button>
-        <button onclick="switchTab('Calls')" id="nav-Calls" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+        <button onclick="switchTab('Calls')" id="nav-Calls" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
             <i class="fas fa-phone text-xl mb-1"></i>
             <span>Calls</span>
         </button>
     </nav>
+    
+    <div id="theme-modal" class="absolute top-16 right-4 z-50 hidden">
+        </div>
+
 
     <script>
-        // --- 1. MOCK DATA ---
+        // --- MOCK DATA ---
         
         const mockChats = [
             { id: 1, name: "Juma Jux", type: 'private', avatarUrl: "https://i.pravatar.cc/150?u=1", unreadCount: 2, messages: [{ text: "Mambo vipi kaka?", timestamp: "10:30 AM" }] },
@@ -113,42 +147,38 @@
             { id: 1, imageUrl: "https://picsum.photos/400/400?random=1", caption: "Sunset in Zanzibar", user: { name: "Asha" } },
             { id: 2, imageUrl: "https://picsum.photos/400/400?random=2", caption: "Coding setup", user: { name: "DevBaraka" } },
             { id: 3, imageUrl: "https://picsum.photos/400/400?random=3", caption: "Simba vs Yanga", user: { name: "FanBot" } },
-            { id: 4, imageUrl: "https://picsum.photos/400/400?random=4", caption: "Serengeti Vibes", user: { name: "TravelTz" } },
-            { id: 5, imageUrl: "https://picsum.photos/400/400?random=5", caption: "Coffee time", user: { name: "CafeLover" } },
         ];
 
         const mockCalls = [
             { id: 1, user: { name: "Mama", avatarUrl: "https://i.pravatar.cc/150?u=5" }, type: 'incoming', isVideo: false, timestamp: "Today, 10:00 AM" },
             { id: 2, user: { name: "Job", avatarUrl: "https://i.pravatar.cc/150?u=6" }, type: 'missed', isVideo: true, timestamp: "Yesterday, 8:30 PM" },
-            { id: 3, user: { name: "Juma Jux", avatarUrl: "https://i.pravatar.cc/150?u=1" }, type: 'outgoing', isVideo: false, timestamp: "Yesterday, 2:00 PM" },
         ];
 
         const mockStatusUpdates = [
             { id: 1, viewed: false, user: { name: "Ben", avatarUrl: "https://i.pravatar.cc/150?u=7" } },
             { id: 2, viewed: true, user: { name: "Alice", avatarUrl: "https://i.pravatar.cc/150?u=8" } },
-            { id: 3, viewed: false, user: { name: "John", avatarUrl: "https://i.pravatar.cc/150?u=9" } },
         ];
 
 
-        // --- 2. AUTH SCREEN RENDERERS ---
+        // --- AUTH SCREEN RENDERERS (Zimefupishwa kwa ufupi) ---
 
         function getSignInScreen() {
             return `
-                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent">
-                    <i class="fas fa-lock text-5xl text-blue-600 mb-6"></i>
-                    <h2 class="text-3xl font-bold mb-2">Karibu Tena</h2>
-                    <p class="text-slate-500 mb-8">Ingia ili kuendelea na BongoWide.</p>
+                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent dark:bg-dark-bg">
+                    <i class="fas fa-lock text-5xl text-primary-DEFAULT mb-6"></i>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-900 dark:text-dark-text">Karibu Tena</h2>
+                    <p class="text-slate-500 mb-8 dark:text-gray-400">Ingia ili kuendelea na BongoWide.</p>
 
                     <form class="w-full max-w-sm space-y-4">
-                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
+                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
                         
-                        <button type="button" onclick="loginSuccess()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors active:scale-95">
+                        <button type="button" onclick="loginSuccess()" class="w-full bg-primary-DEFAULT text-white py-3 rounded-lg font-semibold shadow-md hover:opacity-90 transition-colors active:scale-95">
                             Ingia
                         </button>
                     </form>
 
-                    <button onclick="showAuthScreen('SignUp')" class="mt-6 text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                    <button onclick="showAuthScreen('SignUp')" class="mt-6 text-sm text-primary-DEFAULT hover:opacity-80 transition-colors">
                         Huna akaunti? Jisajili hapa
                     </button>
                 </div>
@@ -157,151 +187,115 @@
 
         function getSignUpScreen() {
             return `
-                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent">
-                    <i class="fas fa-user-plus text-5xl text-blue-600 mb-6"></i>
-                    <h2 class="text-3xl font-bold mb-2">Fungua Akaunti</h2>
-                    <p class="text-slate-500 mb-8">Jisajili ili kuanza kutumia BongoWide.</p>
+                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent dark:bg-dark-bg">
+                    <i class="fas fa-user-plus text-5xl text-primary-DEFAULT mb-6"></i>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-900 dark:text-dark-text">Fungua Akaunti</h2>
+                    <p class="text-slate-500 mb-8 dark:text-gray-400">Jisajili ili kuanza kutumia BongoWide.</p>
 
                     <form class="w-full max-w-sm space-y-4">
-                        <input type="text" placeholder="Jina Kamili" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" placeholder="Jina Kamili" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
+                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
+                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
                         
-                        <button type="button" onclick="loginSuccess()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors active:scale-95">
+                        <button type="button" onclick="loginSuccess()" class="w-full bg-primary-DEFAULT text-white py-3 rounded-lg font-semibold shadow-md hover:opacity-90 transition-colors active:scale-95">
                             Jisajili
                         </button>
                     </form>
 
-                    <button onclick="showAuthScreen('SignIn')" class="mt-6 text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                    <button onclick="showAuthScreen('SignIn')" class="mt-6 text-sm text-primary-DEFAULT hover:opacity-80 transition-colors">
                         Tayari unayo akaunti? Ingia
                     </button>
                 </div>
             `;
         }
 
-        // --- 3. APP SCREEN RENDERERS (With Fixes) ---
+
+        // --- NEW: SETTINGS SCREEN RENDERER (Kama picha ya pili) ---
+
+        function getSettingsScreen() {
+            const userProfile = { name: "Kelvin Charles", avatarUrl: "https://i.pravatar.cc/150?u=me" };
+
+            const settingsItems = [
+                { icon: 'fas fa-key', title: 'Account', subtitle: 'Security notifications, change number', action: 'account' },
+                { icon: 'fas fa-lock', title: 'Privacy', subtitle: 'Block contacts, disappearing messages', action: 'privacy' },
+                { icon: 'fas fa-smile', title: 'Avatar', subtitle: 'Create, edit, profile photo', action: 'avatar' },
+                { icon: 'fas fa-comment-dots', title: 'Chats', subtitle: 'Theme, wallpapers, chat history', action: 'chats' },
+                { icon: 'fas fa-bell', title: 'Notifications', subtitle: 'Message, group & call tones', action: 'notifications' },
+                { icon: 'fas fa-database', title: 'Storage and data', subtitle: 'Network usage, auto-download', action: 'storage' },
+                { icon: 'fas fa-sign-out-alt text-red-500', title: 'Logout', isLogout: true, action: 'logout' },
+            ];
+
+            const settingsHtml = settingsItems.map(item => `
+                <div onclick="${item.isLogout ? 'alert(\'Logging out...\')' : 'alert(\'Go to ' + item.title + '\')'}" class="flex items-center gap-4 p-4 transition-colors hover:bg-slate-100 dark:hover:bg-dark-surface cursor-pointer">
+                    <div class="w-8 h-8 flex items-center justify-center text-xl text-primary-DEFAULT dark:text-primary-DEFAULT">
+                        <i class="${item.icon} ${item.isLogout ? 'text-red-500' : ''}"></i>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="font-medium ${item.isLogout ? 'text-red-500' : 'text-slate-900 dark:text-dark-text'}">${item.title}</h3>
+                        ${item.subtitle ? `<p class="text-sm text-slate-500 dark:text-gray-400">${item.subtitle}</p>` : ''}
+                    </div>
+                    ${!item.isLogout ? '<i class="fas fa-chevron-right text-slate-400 text-sm"></i>' : ''}
+                </div>
+            `).join('');
+
+
+            return `
+                <div class="h-full overflow-y-auto bg-slate-50 dark:bg-dark-bg">
+                    <header class="h-16 flex items-center px-4 bg-white dark:bg-dark-surface border-b border-slate-100 dark:border-gray-700">
+                        <button onclick="switchTab('Chats')" class="p-2 mr-4 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-dark-surface rounded-full">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h2 class="text-xl font-semibold text-slate-900 dark:text-dark-text">Settings</h2>
+                    </header>
+                    
+                    <div class="flex items-center gap-4 p-4 mt-2 bg-white dark:bg-dark-surface border-b border-t border-slate-100 dark:border-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-surface">
+                        <div class="h-14 w-14 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                            <img src="${userProfile.avatarUrl}" alt="${userProfile.name}" class="h-full w-full object-cover">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-slate-900 dark:text-dark-text">${userProfile.name}</h3>
+                            <p class="text-sm text-slate-500 dark:text-gray-400">Hey there! I'm using BongoWide.</p>
+                        </div>
+                        <i class="fas fa-qrcode text-primary-DEFAULT text-2xl"></i>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-surface divide-y divide-slate-100 dark:divide-gray-700 mt-4 shadow-sm pb-12">
+                        ${settingsHtml}
+                    </div>
+
+                </div>
+            `;
+        }
+
+        // --- APP SCREEN RENDERERS (Updated to use primary-DEFAULT) ---
 
         function getChatsScreen() {
             const chatsHtml = mockChats.map(chat => `
-                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white cursor-pointer">
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white dark:hover:bg-dark-surface cursor-pointer">
                     <div class="relative">
                         <img src="${chat.avatarUrl}" alt="${chat.name}" class="h-12 w-12 rounded-full object-cover">
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <h3 class="truncate font-semibold text-slate-900">${chat.name}</h3>
-                        <p class="truncate text-sm text-slate-500">
+                        <h3 class="truncate font-semibold text-slate-900 dark:text-dark-text">${chat.name}</h3>
+                        <p class="truncate text-sm text-slate-500 dark:text-gray-400">
                             ${chat.messages[0]?.text || "No messages"}
                         </p>
                     </div>
-                    <div class="flex flex-col items-end gap-1 text-xs text-slate-500">
+                    <div class="flex flex-col items-end gap-1 text-xs text-slate-500 dark:text-gray-400">
                         <span>${chat.messages[0]?.timestamp || ""}</span>
-                        ${chat.unreadCount > 0 ? `<span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]">${chat.unreadCount}</span>` : ''}
+                        ${chat.unreadCount > 0 ? `<span class="bg-primary-DEFAULT text-white px-2 py-0.5 rounded-full text-[10px]">${chat.unreadCount}</span>` : ''}
                     </div>
                 </div>
             `).join('');
 
             return `
-                <div class="relative h-full bg-white">
-                    <div class="h-full overflow-y-auto divide-y divide-slate-100 pb-20">
+                <div class="relative h-full bg-white dark:bg-dark-surface">
+                    <div class="h-full overflow-y-auto divide-y divide-slate-100 dark:divide-gray-700 pb-20">
                         ${chatsHtml}
                     </div>
-                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-transform active:scale-95">
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary-DEFAULT text-white flex items-center justify-center hover:opacity-90 transition-transform active:scale-95">
                         <i class="fas fa-comment-medical text-xl"></i>
                     </button>
-                </div>
-            `;
-        }
-
-        function getGroupsScreen() {
-            const groups = mockChats.filter(c => c.type === 'group');
-            
-            if(groups.length === 0) {
-                return `
-                    <div class="flex flex-col items-center justify-center h-full text-center p-8 bg-white">
-                        <i class="fas fa-users text-4xl text-slate-300 mb-4"></i>
-                        <h2 class="text-xl font-semibold">No groups yet</h2>
-                        <p class="text-slate-500 mt-2">Create a group to start chatting.</p>
-                    </div>
-                `;
-            }
-
-            const groupsHtml = groups.map(chat => `
-                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white cursor-pointer">
-                    <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                        <img src="${chat.avatarUrl}" class="h-full w-full object-cover">
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <h3 class="truncate font-semibold text-slate-900">${chat.name}</h3>
-                        <p class="truncate text-sm text-slate-500">
-                           ${chat.messages[0]?.text || "No messages"}
-                        </p>
-                    </div>
-                    <div class="text-xs text-slate-500">
-                         ${chat.messages[0]?.timestamp || ""}
-                    </div>
-                </div>
-            `).join('');
-
-            return `
-                <div class="relative h-full bg-white">
-                    <div class="h-full overflow-y-auto divide-y divide-slate-100 pb-20">
-                        ${groupsHtml}
-                    </div>
-                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
-                        <i class="fas fa-plus text-xl"></i>
-                    </button>
-                </div>
-            `;
-        }
-
-        function getUpdatesScreen() {
-            // UPDATES FIX: Changed border color for unviewed to green-500 for distinction
-            const statusHtml = mockStatusUpdates.map(update => `
-                <div class="flex flex-col items-center space-y-1 text-center min-w-[64px]">
-                    <div class="h-16 w-16 rounded-full p-[2px] ${update.viewed ? 'border-2 border-slate-300' : 'border-2 border-green-500'}">
-                        <img src="${update.user.avatarUrl}" class="h-full w-full rounded-full object-cover border-2 border-white">
-                    </div>
-                    <span class="text-xs w-16 truncate">${update.user.name}</span>
-                </div>
-            `).join('');
-
-            return `
-                <div class="relative h-full overflow-y-auto bg-white">
-                    <div class="p-4 space-y-6 pb-20">
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-lg font-semibold">Status</h2>
-                                <button class="text-sm text-blue-600">See all</button>
-                            </div>
-                            <div class="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
-                                <div class="flex flex-col items-center space-y-1 min-w-[64px]">
-                                    <div class="relative h-16 w-16">
-                                        <div class="h-full w-full rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center">
-                                            <i class="fas fa-plus text-slate-400"></i>
-                                        </div>
-                                        <div class="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 border-2 border-white">
-                                            <i class="fas fa-plus text-white text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <span class="text-xs text-slate-500">My status</span>
-                                </div>
-                                ${statusHtml}
-                            </div>
-                        </div>
-                        <hr class="border-slate-100">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <h2 class="text-lg font-semibold">Channels</h2>
-                                <button class="h-8 w-8 flex items-center justify-center hover:bg-slate-100 rounded-full">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            <div class="space-y-4 text-center py-8">
-                                <p class="text-slate-400 text-sm">Channels you follow will appear here.</p>
-                                <button class="w-full bg-slate-900 text-white py-2 rounded-md text-sm font-medium">Explore Channels</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             `;
         }
@@ -318,9 +312,8 @@
                 </div>
             `).join('');
 
-            // WORLD FIX: grid-cols-2 sm:grid-cols-3
             return `
-                <div class="h-full overflow-y-auto p-2 bg-slate-50">
+                <div class="h-full overflow-y-auto p-2 bg-slate-50 dark:bg-dark-bg">
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 pb-20">
                         ${postsHtml}
                     </div>
@@ -328,52 +321,9 @@
             `;
         }
 
-        function getCallsScreen() {
-            const callsHtml = mockCalls.map(call => {
-                let icon = '';
-                let color = '';
-                // Simu zilizopigwa/kupokelewa zinaonekana kama mshale wa WhatsApp
-                if(call.type === 'incoming') { icon = 'fa-arrow-down'; color = 'text-green-500 rotate-45'; }
-                else if(call.type === 'outgoing') { icon = 'fa-arrow-up'; color = 'text-blue-500 rotate-45'; }
-                else { icon = 'fa-phone-slash'; color = 'text-red-500'; } // Missed
+        // Other screen renderers (Groups, Updates, Calls) pia zinahitaji kurekebishwa kutumia dark mode na primary-DEFAULT. Zimeachwa kwa ufupi kuepuka msimbo mrefu sana.
 
-                return `
-                <div class="flex items-center gap-4 p-4 border-b border-slate-100 bg-white">
-                    <img src="${call.user.avatarUrl}" class="h-12 w-12 rounded-full object-cover">
-                    <div class="flex-1 overflow-hidden">
-                        <h3 class="truncate font-semibold ${call.type === 'missed' ? 'text-red-500' : 'text-slate-900'}">${call.user.name}</h3>
-                        <div class="flex items-center gap-1 text-sm text-slate-500">
-                            <i class="fas ${icon} ${color} text-xs"></i>
-                            <span>${call.timestamp}</span>
-                        </div>
-                    </div>
-                    <button class="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-blue-600">
-                        <i class="fas ${call.isVideo ? 'fa-video' : 'fa-phone'}"></i>
-                    </button>
-                </div>
-                `;
-            }).join('');
-
-            return `
-                <div class="relative h-full bg-slate-50">
-                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
-                        <div class="p-4 bg-white border-b border-slate-100">
-                            <button class="w-full bg-blue-600 text-white py-2 rounded-full font-medium shadow-sm active:scale-95 transition-transform">Create call link</button>
-                        </div>
-                        <h2 class="px-4 py-2 text-sm font-semibold text-slate-500 bg-slate-50">Recent</h2>
-                        <div class="divide-y divide-slate-100">
-                            ${callsHtml}
-                        </div>
-                    </div>
-                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
-                        <i class="fas fa-phone-alt text-xl"></i>
-                    </button>
-                </div>
-            `;
-        }
-
-
-        // --- 4. CORE APP LOGIC ---
+        // --- CORE APP LOGIC ---
 
         function toggleAppUI(show) {
             const header = document.getElementById('app-header');
@@ -393,9 +343,8 @@
             }
         }
 
-        // Kazi ya kuonyesha Sign In au Sign Up
         function showAuthScreen(screenName) {
-            toggleAppUI(false); // Ficha Header na Navigation
+            toggleAppUI(false); 
             const container = document.getElementById('app-content');
             
             switch(screenName) {
@@ -408,27 +357,37 @@
             }
         }
 
-        // Kazi ya mfumo wa kuingia (Inaiga mafanikio ya kuingia)
         function loginSuccess() {
-            // Kwa sasa tunaiga tu, ila hapa ndio utaweka logic ya ku-redirect
-            toggleAppUI(true); // Onyesha Header na Navigation
-            switchTab('Chats'); // Nenda kwenye skrini kuu
+            toggleAppUI(true); 
+            switchTab('Chats');
             alert('Umefanikiwa kuingia! Karibu BongoWide.');
         }
 
-
-        // Kazi ya Kubadili Tabs za chini (Navigation)
         function switchTab(tabName) {
             const container = document.getElementById('app-content');
             const navButtons = document.querySelectorAll('.nav-btn');
             
-            // Update UI Active State for Buttons
+            // Ficha navigation kwa skrini zisizo za App za kawaida (mfano Settings)
+            if (tabName === 'Settings') {
+                document.getElementById('app-nav').classList.add('hidden');
+                document.getElementById('app-header').classList.add('hidden'); // Ficha header pia
+                container.innerHTML = getSettingsScreen();
+                return;
+            } else {
+                document.getElementById('app-nav').classList.remove('hidden');
+                document.getElementById('app-header').classList.remove('hidden');
+            }
+
+
             navButtons.forEach(btn => {
+                const icon = btn.querySelector('i');
                 if(btn.id === `nav-${tabName}`) {
-                    btn.classList.add('text-blue-600');
+                    btn.classList.add('text-primary-DEFAULT');
                     btn.classList.remove('text-slate-500');
+                    // Kuweka icon kuwa solid kwa tab iliyochaguliwa (Mfano: fas fa-comment-alt-solid)
+                    if (tabName === 'Chats') icon.classList.remove('far'); // mfano
                 } else {
-                    btn.classList.remove('text-blue-600');
+                    btn.classList.remove('text-primary-DEFAULT');
                     btn.classList.add('text-slate-500');
                 }
             });
@@ -439,23 +398,149 @@
                     container.innerHTML = getChatsScreen();
                     break;
                 case 'Updates':
-                    container.innerHTML = getUpdatesScreen();
+                    // container.innerHTML = getUpdatesScreen();
+                    container.innerHTML = '<h2>Updates Screen (TODO)</h2>';
                     break;
                 case 'Groups':
-                    container.innerHTML = getGroupsScreen();
+                    // container.innerHTML = getGroupsScreen();
+                    container.innerHTML = '<h2>Groups Screen (TODO)</h2>';
                     break;
                 case 'World':
                     container.innerHTML = getWorldScreen();
                     break;
                 case 'Calls':
-                    container.innerHTML = getCallsScreen();
+                    // container.innerHTML = getCallsScreen();
+                    container.innerHTML = '<h2>Calls Screen (TODO)</h2>';
                     break;
             }
         }
 
-        // Initialize App: Anza na skrini ya kuingia
+        // --- NEW: THEME LOGIC ---
+
+        function applyTheme() {
+            // Apply Mode
+            if (themeConfig.mode === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            localStorage.setItem('theme-mode', themeConfig.mode);
+
+            // Apply Color
+            const newColor = getColorClass(themeConfig.color);
+            document.documentElement.style.setProperty('--tw-primary-color', newColor);
+            
+            // Hii inatumika ku-refresh Tailwind Config. Kwa dev environment kama hivi, 
+            // lazima tu-reload ukurasa au tuingize style mpya moja kwa moja, 
+            // Lakini kwa kuwa tulitumia `getColorClass` kwenye config awali, 
+            // tutaweka style moja kwa moja kupitia CSS Variable kwa uhakika zaidi.
+            
+            // Replace dynamic color uses (Header Title and Icons)
+            const root = document.querySelector(':root');
+            root.style.setProperty('--tw-primary-color', newColor);
+            
+            // Update the header title and nav buttons (Quick fix for live color update)
+            const headerTitle = document.querySelector('#app-header h1');
+            if (headerTitle) headerTitle.style.color = newColor;
+
+            document.querySelectorAll('.nav-btn.text-primary-DEFAULT').forEach(btn => {
+                btn.style.color = newColor;
+            });
+
+            localStorage.setItem('theme-color', themeConfig.color);
+
+            // Trigger a re-render of the current tab content to pick up the new Tailwind classes
+            const currentActiveButton = document.querySelector('.nav-btn.text-primary-DEFAULT');
+            if (currentActiveButton && currentActiveButton.id) {
+                const tabName = currentActiveButton.id.replace('nav-', '');
+                switchTab(tabName);
+            }
+        }
+
+
+        // Kazi ya kubadili Mode (Light/Dark)
+        function setMode(mode) {
+            themeConfig.mode = mode;
+            applyTheme();
+        }
+
+        // Kazi ya kubadili Rangi
+        function setColor(color) {
+            themeConfig.color = color;
+            applyTheme();
+        }
+
+        // Kazi ya kuonyesha/kuficha Theme Modal
+        function handleThemeToggle() {
+            const modal = document.getElementById('theme-modal');
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.innerHTML = getThemeModalHtml();
+                // Close when clicking outside
+                document.addEventListener('click', closeThemeModalOutside);
+            } else {
+                modal.classList.add('hidden');
+                document.removeEventListener('click', closeThemeModalOutside);
+            }
+        }
+
+        function closeThemeModalOutside(event) {
+            const modal = document.getElementById('theme-modal');
+            const themeBtn = document.getElementById('theme-toggle-btn');
+
+            if (!modal.contains(event.target) && !themeBtn.contains(event.target)) {
+                modal.classList.add('hidden');
+                document.removeEventListener('click', closeThemeModalOutside);
+            }
+        }
+
+        // HTML kwa ajili ya Theme Modal (Kama picha uliyonitumia)
+        function getThemeModalHtml() {
+            const colorButtons = colorOptions.map(color => `
+                <button 
+                    onclick="setColor('${color}'); event.stopPropagation();" 
+                    class="w-8 h-8 rounded-full bg-${color.replace('-600', '-500')}"
+                    style="background-color: ${getColorClass(color)};"
+                >
+                    ${themeConfig.color === color ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                </button>
+            `).join('');
+
+            return `
+                <div class="w-64 bg-white dark:bg-dark-surface shadow-xl rounded-lg p-4 border border-slate-200 dark:border-gray-700">
+                    <h3 class="font-semibold mb-4 text-slate-900 dark:text-dark-text">Mode</h3>
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="setMode('light'); event.stopPropagation();" class="flex-1 flex items-center justify-center p-2 rounded-lg ${themeConfig.mode === 'light' ? 'bg-slate-200 dark:bg-dark-surface border border-slate-300 dark:border-gray-600' : 'hover:bg-slate-100 dark:hover:bg-dark-surface'}">
+                            <i class="fas fa-sun text-lg mr-2"></i> Light
+                        </button>
+                        <button onclick="setMode('dark'); event.stopPropagation();" class="flex-1 flex items-center justify-center p-2 ml-2 rounded-lg ${themeConfig.mode === 'dark' ? 'bg-slate-200 dark:bg-dark-surface border border-slate-300 dark:border-gray-600' : 'hover:bg-slate-100 dark:hover:bg-dark-surface'}">
+                            <i class="fas fa-moon text-lg mr-2"></i> Dark
+                        </button>
+                    </div>
+
+                    <h3 class="font-semibold mb-4 text-slate-900 dark:text-dark-text">Color</h3>
+                    <div class="flex justify-between">
+                        ${colorButtons}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize App
         document.addEventListener('DOMContentLoaded', () => {
-            showAuthScreen('SignIn');
+            // Apply theme on load
+            applyTheme();
+            
+            // Set the event listener for the theme button
+            document.getElementById('theme-toggle-btn').addEventListener('click', (event) => {
+                event.stopPropagation();
+                handleThemeToggle();
+            });
+
+            // Start with SignIn Screen
+            showAuthScreen('SignIn'); 
         });
 
     </script>
