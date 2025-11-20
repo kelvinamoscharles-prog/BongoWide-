@@ -51,11 +51,12 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         body { background-color: #f8fafc; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .auth-container { background-color: #f8fafc; } /* Kwa kutumia background color ya body kwa auth screens */
     </style>
 </head>
 <body class="text-slate-900">
 
-    <header class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-10">
+    <header id="app-header" class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-10 hidden">
         <h1 class="text-2xl font-bold text-blue-600">BongoWide</h1>
         <div class="flex items-center gap-2">
             <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
@@ -72,10 +73,10 @@
         </div>
     </header>
 
-    <main id="app-content" class="flex-1 overflow-hidden relative bg-slate-50">
-        </main>
+    <main id="app-content" class="flex-1 overflow-hidden relative auth-container">
+    </main>
 
-    <nav class="flex h-16 items-center justify-around border-t bg-white z-10">
+    <nav id="app-nav" class="flex h-16 items-center justify-around border-t bg-white z-10 hidden">
         <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-comment-alt text-xl mb-1"></i>
             <span>Chats</span>
@@ -99,8 +100,7 @@
     </nav>
 
     <script>
-        // --- 1. MOCK DATA (Hii inachukua nafasi ya @/lib/chatverse-data ambayo haipo) ---
-        // Nimetengeneza hii kulingana na variables ulizotumia kwenye components zako.
+        // --- 1. MOCK DATA ---
         
         const mockChats = [
             { id: 1, name: "Juma Jux", type: 'private', avatarUrl: "https://i.pravatar.cc/150?u=1", unreadCount: 2, messages: [{ text: "Mambo vipi kaka?", timestamp: "10:30 AM" }] },
@@ -129,11 +129,61 @@
             { id: 3, viewed: false, user: { name: "John", avatarUrl: "https://i.pravatar.cc/150?u=9" } },
         ];
 
-        // --- 2. SCREEN RENDERERS (Functions to generate HTML strings) ---
+
+        // --- 2. AUTH SCREEN RENDERERS ---
+
+        function getSignInScreen() {
+            return `
+                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent">
+                    <i class="fas fa-lock text-5xl text-blue-600 mb-6"></i>
+                    <h2 class="text-3xl font-bold mb-2">Karibu Tena</h2>
+                    <p class="text-slate-500 mb-8">Ingia ili kuendelea na BongoWide.</p>
+
+                    <form class="w-full max-w-sm space-y-4">
+                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        
+                        <button type="button" onclick="loginSuccess()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors active:scale-95">
+                            Ingia
+                        </button>
+                    </form>
+
+                    <button onclick="showAuthScreen('SignUp')" class="mt-6 text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                        Huna akaunti? Jisajili hapa
+                    </button>
+                </div>
+            `;
+        }
+
+        function getSignUpScreen() {
+            return `
+                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent">
+                    <i class="fas fa-user-plus text-5xl text-blue-600 mb-6"></i>
+                    <h2 class="text-3xl font-bold mb-2">Fungua Akaunti</h2>
+                    <p class="text-slate-500 mb-8">Jisajili ili kuanza kutumia BongoWide.</p>
+
+                    <form class="w-full max-w-sm space-y-4">
+                        <input type="text" placeholder="Jina Kamili" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        
+                        <button type="button" onclick="loginSuccess()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors active:scale-95">
+                            Jisajili
+                        </button>
+                    </form>
+
+                    <button onclick="showAuthScreen('SignIn')" class="mt-6 text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                        Tayari unayo akaunti? Ingia
+                    </button>
+                </div>
+            `;
+        }
+
+        // --- 3. APP SCREEN RENDERERS (With Fixes) ---
 
         function getChatsScreen() {
             const chatsHtml = mockChats.map(chat => `
-                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white border-b border-slate-100 cursor-pointer">
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white cursor-pointer">
                     <div class="relative">
                         <img src="${chat.avatarUrl}" alt="${chat.name}" class="h-12 w-12 rounded-full object-cover">
                     </div>
@@ -151,8 +201,8 @@
             `).join('');
 
             return `
-                <div class="relative h-full">
-                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
+                <div class="relative h-full bg-white">
+                    <div class="h-full overflow-y-auto divide-y divide-slate-100 pb-20">
                         ${chatsHtml}
                     </div>
                     <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-transform active:scale-95">
@@ -167,7 +217,7 @@
             
             if(groups.length === 0) {
                 return `
-                    <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                    <div class="flex flex-col items-center justify-center h-full text-center p-8 bg-white">
                         <i class="fas fa-users text-4xl text-slate-300 mb-4"></i>
                         <h2 class="text-xl font-semibold">No groups yet</h2>
                         <p class="text-slate-500 mt-2">Create a group to start chatting.</p>
@@ -176,7 +226,7 @@
             }
 
             const groupsHtml = groups.map(chat => `
-                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white border-b border-slate-100 cursor-pointer">
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white cursor-pointer">
                     <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
                         <img src="${chat.avatarUrl}" class="h-full w-full object-cover">
                     </div>
@@ -193,8 +243,8 @@
             `).join('');
 
             return `
-                <div class="relative h-full">
-                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
+                <div class="relative h-full bg-white">
+                    <div class="h-full overflow-y-auto divide-y divide-slate-100 pb-20">
                         ${groupsHtml}
                     </div>
                     <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
@@ -205,9 +255,10 @@
         }
 
         function getUpdatesScreen() {
+            // UPDATES FIX: Changed border color for unviewed to green-500 for distinction
             const statusHtml = mockStatusUpdates.map(update => `
                 <div class="flex flex-col items-center space-y-1 text-center min-w-[64px]">
-                    <div class="h-16 w-16 rounded-full p-[2px] ${update.viewed ? 'border-2 border-slate-300' : 'border-2 border-blue-600'}">
+                    <div class="h-16 w-16 rounded-full p-[2px] ${update.viewed ? 'border-2 border-slate-300' : 'border-2 border-green-500'}">
                         <img src="${update.user.avatarUrl}" class="h-full w-full rounded-full object-cover border-2 border-white">
                     </div>
                     <span class="text-xs w-16 truncate">${update.user.name}</span>
@@ -267,9 +318,10 @@
                 </div>
             `).join('');
 
+            // WORLD FIX: grid-cols-2 sm:grid-cols-3
             return `
                 <div class="h-full overflow-y-auto p-2 bg-slate-50">
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 pb-20">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 pb-20">
                         ${postsHtml}
                     </div>
                 </div>
@@ -280,6 +332,7 @@
             const callsHtml = mockCalls.map(call => {
                 let icon = '';
                 let color = '';
+                // Simu zilizopigwa/kupokelewa zinaonekana kama mshale wa WhatsApp
                 if(call.type === 'incoming') { icon = 'fa-arrow-down'; color = 'text-green-500 rotate-45'; }
                 else if(call.type === 'outgoing') { icon = 'fa-arrow-up'; color = 'text-blue-500 rotate-45'; }
                 else { icon = 'fa-phone-slash'; color = 'text-red-500'; } // Missed
@@ -302,13 +355,15 @@
             }).join('');
 
             return `
-                <div class="relative h-full">
+                <div class="relative h-full bg-slate-50">
                     <div class="h-full overflow-y-auto divide-y divide-border pb-20">
-                        <div class="p-4">
+                        <div class="p-4 bg-white border-b border-slate-100">
                             <button class="w-full bg-blue-600 text-white py-2 rounded-full font-medium shadow-sm active:scale-95 transition-transform">Create call link</button>
                         </div>
                         <h2 class="px-4 py-2 text-sm font-semibold text-slate-500 bg-slate-50">Recent</h2>
-                        ${callsHtml}
+                        <div class="divide-y divide-slate-100">
+                            ${callsHtml}
+                        </div>
                     </div>
                     <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
                         <i class="fas fa-phone-alt text-xl"></i>
@@ -317,8 +372,52 @@
             `;
         }
 
-        // --- 3. APP LOGIC (Switching Tabs) ---
 
+        // --- 4. CORE APP LOGIC ---
+
+        function toggleAppUI(show) {
+            const header = document.getElementById('app-header');
+            const nav = document.getElementById('app-nav');
+            const main = document.getElementById('app-content');
+
+            if (show) {
+                header.classList.remove('hidden');
+                nav.classList.remove('hidden');
+                main.classList.remove('auth-container');
+                main.classList.add('bg-slate-50');
+            } else {
+                header.classList.add('hidden');
+                nav.classList.add('hidden');
+                main.classList.add('auth-container');
+                main.classList.remove('bg-slate-50');
+            }
+        }
+
+        // Kazi ya kuonyesha Sign In au Sign Up
+        function showAuthScreen(screenName) {
+            toggleAppUI(false); // Ficha Header na Navigation
+            const container = document.getElementById('app-content');
+            
+            switch(screenName) {
+                case 'SignIn':
+                    container.innerHTML = getSignInScreen();
+                    break;
+                case 'SignUp':
+                    container.innerHTML = getSignUpScreen();
+                    break;
+            }
+        }
+
+        // Kazi ya mfumo wa kuingia (Inaiga mafanikio ya kuingia)
+        function loginSuccess() {
+            // Kwa sasa tunaiga tu, ila hapa ndio utaweka logic ya ku-redirect
+            toggleAppUI(true); // Onyesha Header na Navigation
+            switchTab('Chats'); // Nenda kwenye skrini kuu
+            alert('Umefanikiwa kuingia! Karibu BongoWide.');
+        }
+
+
+        // Kazi ya Kubadili Tabs za chini (Navigation)
         function switchTab(tabName) {
             const container = document.getElementById('app-content');
             const navButtons = document.querySelectorAll('.nav-btn');
@@ -354,9 +453,9 @@
             }
         }
 
-        // Initialize App
+        // Initialize App: Anza na skrini ya kuingia
         document.addEventListener('DOMContentLoaded', () => {
-            switchTab('Chats'); // Default tab
+            showAuthScreen('SignIn');
         });
 
     </script>
