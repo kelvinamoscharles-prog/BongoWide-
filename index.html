@@ -16,7 +16,7 @@
             color: localStorage.getItem('theme-color') || 'blue-600', // Default color
         };
 
-        // Rangi zilizopo za kuchagua (kama picha ulivyotuma)
+        // Rangi zilizopo za kuchagua
         const colorOptions = [
             'blue-600', 'green-500', 'purple-600', 'orange-500', 'red-600'
         ];
@@ -45,14 +45,15 @@
                         foreground: "hsl(var(--foreground))",
                         // Primary color uses the dynamic theme color
                         primary: {
-                            DEFAULT: getColorClass(themeConfig.color),
+                            // Hii itatumia CSS variable kwa updates za haraka
+                            DEFAULT: 'var(--tw-primary-color, #2563eb)', 
                             foreground: "#ffffff",
                         },
                         secondary: {
                             DEFAULT: "#f1f5f9",
                             foreground: "#0f172a",
                         },
-                        // Custom dark mode colors (Maboresho ya Dark Mode)
+                        // Custom dark mode colors
                         'dark-bg': '#111827',
                         'dark-surface': '#1f2937',
                         'dark-text': '#f3f4f6',
@@ -68,62 +69,67 @@
         
         /* Body default state */
         body { background-color: #f8fafc; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .auth-container { background-color: #f8fafc; }
-
+        
         /* Dark Mode overrides */
-        .dark body { background-color: #111827; color: #f3f4f6; }
-        .dark .bg-white { background-color: #1f2937 !important; color: #f3f4f6; }
-        .dark .border-b, .dark .divide-y { border-color: #374151 !important; }
+        .dark { color-scheme: dark; }
+        .dark body { background-color: #000000; color: #f3f4f6; } 
+        .dark .bg-white { background-color: #1a1a1a !important; color: #f3f4f6; } 
+        .dark .bg-slate-50 { background-color: #000000 !important; } 
+        .dark .bg-slate-200 { background-color: #333333 !important; }
         .dark .text-slate-900 { color: #f3f4f6 !important; }
-        .dark .text-slate-500, .dark .text-slate-600 { color: #9ca3af !important; }
-        .dark .hover\:bg-slate-100:hover { background-color: #374158 !important; }
-        .dark .bg-slate-50 { background-color: #111827 !important; }
-        .dark .bg-slate-200 { background-color: #374151 !important; }
-        .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.2); }
+        .dark .text-slate-500, .dark .text-slate-600 { color: #aaaaaa !important; }
+        .dark .border-b, .dark .border-t, .dark .divide-y, .dark .border { border-color: #333333 !important; }
+        .dark .hover\:bg-slate-50:hover { background-color: #0d0d0d !important; }
+        .dark .hover\:bg-slate-100:hover { background-color: #333333 !important; }
+        
+        /* Primary color variable for dynamic updates */
+        :root {
+            --tw-primary-color: #2563eb;
+        }
     </style>
 </head>
 
 <body class="text-slate-900">
 
-    <header id="app-header" class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-10 hidden">
-        <h1 class="text-2xl font-bold text-primary-DEFAULT">BongoWide</h1>
+    <header id="app-header" class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-20">
+        <h1 class="text-2xl font-bold" style="color: var(--tw-primary-color);">BongoWide</h1>
         <div class="flex items-center gap-2">
             <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
                 <i class="fas fa-bell text-lg"></i>
             </button>
-            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600" id="search-btn">
+            <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 relative">
+                <i class="fas fa-palette text-lg"></i> 
+            </button>
+            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
                 <i class="fas fa-search text-lg"></i>
             </button>
-            <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 relative">
-                <i class="fas fa-adjust text-lg"></i> 
-            </button>
-            <button onclick="switchTab('Settings')" class="ml-1 h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
-                <img src="https://i.pravatar.cc/150?u=me" alt="User" class="h-full w-full object-cover">
+            <button onclick="switchTab('Settings')" class="ml-1 h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300 flex items-center justify-center font-bold text-sm">
+                KC
             </button>
         </div>
     </header>
 
-    <main id="app-content" class="flex-1 overflow-hidden relative auth-container">
+    <main id="app-content" class="flex-1 overflow-hidden relative bg-slate-50">
     </main>
 
-    <nav id="app-nav" class="flex h-16 items-center justify-around border-t bg-white z-10 hidden">
-        <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
+    <nav id="app-nav" class="flex h-16 items-center justify-around border-t bg-white z-20">
+        <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-comment-alt text-xl mb-1"></i>
             <span>Chats</span>
         </button>
-        <button onclick="switchTab('Updates')" id="nav-Updates" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
+        <button onclick="switchTab('Updates')" id="nav-Updates" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-rss text-xl mb-1"></i>
             <span>Updates</span>
         </button>
-        <button onclick="switchTab('Groups')" id="nav-Groups" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
+        <button onclick="switchTab('Groups')" id="nav-Groups" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-users text-xl mb-1"></i>
             <span>Groups</span>
         </button>
-        <button onclick="switchTab('World')" id="nav-World" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
+        <button onclick="switchTab('World')" id="nav-World" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-globe text-xl mb-1"></i>
             <span>World</span>
         </button>
-        <button onclick="switchTab('Calls')" id="nav-Calls" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-primary-DEFAULT transition-colors">
+        <button onclick="switchTab('Calls')" id="nav-Calls" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-phone text-xl mb-1"></i>
             <span>Calls</span>
         </button>
@@ -134,7 +140,7 @@
 
 
     <script>
-        // --- MOCK DATA ---
+        // --- 1. MOCK DATA ---
         
         const mockChats = [
             { id: 1, name: "Juma Jux", type: 'private', avatarUrl: "https://i.pravatar.cc/150?u=1", unreadCount: 2, messages: [{ text: "Mambo vipi kaka?", timestamp: "10:30 AM" }] },
@@ -143,75 +149,28 @@
             { id: 4, name: "Tech Talk TZ", type: 'group', avatarUrl: "https://i.pravatar.cc/150?u=4", unreadCount: 10, messages: [{ text: "New React version released", timestamp: "2 days ago" }] }
         ];
 
-        const mockWorldPosts = [
-            { id: 1, imageUrl: "https://picsum.photos/400/400?random=1", caption: "Sunset in Zanzibar", user: { name: "Asha" } },
-            { id: 2, imageUrl: "https://picsum.photos/400/400?random=2", caption: "Coding setup", user: { name: "DevBaraka" } },
-            { id: 3, imageUrl: "https://picsum.photos/400/400?random=3", caption: "Simba vs Yanga", user: { name: "FanBot" } },
-        ];
-
-        const mockCalls = [
-            { id: 1, user: { name: "Mama", avatarUrl: "https://i.pravatar.cc/150?u=5" }, type: 'incoming', isVideo: false, timestamp: "Today, 10:00 AM" },
-            { id: 2, user: { name: "Job", avatarUrl: "https://i.pravatar.cc/150?u=6" }, type: 'missed', isVideo: true, timestamp: "Yesterday, 8:30 PM" },
-        ];
-
         const mockStatusUpdates = [
             { id: 1, viewed: false, user: { name: "Ben", avatarUrl: "https://i.pravatar.cc/150?u=7" } },
             { id: 2, viewed: true, user: { name: "Alice", avatarUrl: "https://i.pravatar.cc/150?u=8" } },
+            { id: 3, viewed: false, user: { name: "John", avatarUrl: "https://i.pravatar.cc/150?u=9" } },
+        ];
+        
+        const mockFriendRequests = [
+            { id: 1, name: "Alex Doe", age: 28, gender: 'Male', time: 'about 3 hours ago', avatarUrl: "https://i.pravatar.cc/150?u=alex" },
+            { id: 2, name: "Samantha Bee", age: 25, gender: 'Female', time: '1 day ago', avatarUrl: "https://i.pravatar.cc/150?u=samantha" },
+        ];
+
+        const mockCallContacts = [
+            { id: 1, name: "Kelvin Kelvin Amos Charles", avatarUrl: "https://i.pravatar.cc/150?u=kelvin" },
+            { id: 2, name: "Jedo Mavimba", avatarUrl: "https://i.pravatar.cc/150?u=jedo" },
+            { id: 3, name: "Felicia John", avatarUrl: "https://i.pravatar.cc/150?u=felicia" },
+            { id: 4, name: "Saniya Cutebaby", avatarUrl: "https://i.pravatar.cc/150?u=saniya" },
         ];
 
 
-        // --- AUTH SCREEN RENDERERS (Zimefupishwa kwa ufupi) ---
+        // --- 2. SCREEN RENDERERS ---
 
-        function getSignInScreen() {
-            return `
-                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent dark:bg-dark-bg">
-                    <i class="fas fa-lock text-5xl text-primary-DEFAULT mb-6"></i>
-                    <h2 class="text-3xl font-bold mb-2 text-slate-900 dark:text-dark-text">Karibu Tena</h2>
-                    <p class="text-slate-500 mb-8 dark:text-gray-400">Ingia ili kuendelea na BongoWide.</p>
-
-                    <form class="w-full max-w-sm space-y-4">
-                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
-                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
-                        
-                        <button type="button" onclick="loginSuccess()" class="w-full bg-primary-DEFAULT text-white py-3 rounded-lg font-semibold shadow-md hover:opacity-90 transition-colors active:scale-95">
-                            Ingia
-                        </button>
-                    </form>
-
-                    <button onclick="showAuthScreen('SignUp')" class="mt-6 text-sm text-primary-DEFAULT hover:opacity-80 transition-colors">
-                        Huna akaunti? Jisajili hapa
-                    </button>
-                </div>
-            `;
-        }
-
-        function getSignUpScreen() {
-            return `
-                <div class="flex flex-col items-center justify-center h-full p-8 text-center bg-white sm:bg-transparent dark:bg-dark-bg">
-                    <i class="fas fa-user-plus text-5xl text-primary-DEFAULT mb-6"></i>
-                    <h2 class="text-3xl font-bold mb-2 text-slate-900 dark:text-dark-text">Fungua Akaunti</h2>
-                    <p class="text-slate-500 mb-8 dark:text-gray-400">Jisajili ili kuanza kutumia BongoWide.</p>
-
-                    <form class="w-full max-w-sm space-y-4">
-                        <input type="text" placeholder="Jina Kamili" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
-                        <input type="email" placeholder="Barua pepe" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
-                        <input type="password" placeholder="Neno Siri" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-DEFAULT focus:border-primary-DEFAULT dark:bg-dark-surface dark:border-gray-700">
-                        
-                        <button type="button" onclick="loginSuccess()" class="w-full bg-primary-DEFAULT text-white py-3 rounded-lg font-semibold shadow-md hover:opacity-90 transition-colors active:scale-95">
-                            Jisajili
-                        </button>
-                    </form>
-
-                    <button onclick="showAuthScreen('SignIn')" class="mt-6 text-sm text-primary-DEFAULT hover:opacity-80 transition-colors">
-                        Tayari unayo akaunti? Ingia
-                    </button>
-                </div>
-            `;
-        }
-
-
-        // --- NEW: SETTINGS SCREEN RENDERER (Kama picha ya pili) ---
-
+        // NEW: SETTINGS SCREEN RENDERER (Kama picha ya pili ulivyoomba mwanzo)
         function getSettingsScreen() {
             const userProfile = { name: "Kelvin Charles", avatarUrl: "https://i.pravatar.cc/150?u=me" };
 
@@ -222,17 +181,20 @@
                 { icon: 'fas fa-comment-dots', title: 'Chats', subtitle: 'Theme, wallpapers, chat history', action: 'chats' },
                 { icon: 'fas fa-bell', title: 'Notifications', subtitle: 'Message, group & call tones', action: 'notifications' },
                 { icon: 'fas fa-database', title: 'Storage and data', subtitle: 'Network usage, auto-download', action: 'storage' },
-                { icon: 'fas fa-sign-out-alt text-red-500', title: 'Logout', isLogout: true, action: 'logout' },
+                { icon: 'fas fa-sign-out-alt', title: 'Logout', isLogout: true, action: 'logout' },
             ];
+            
+            // Re-render the primary color using CSS variable
+            const primaryColor = `var(--tw-primary-color)`;
 
             const settingsHtml = settingsItems.map(item => `
-                <div onclick="${item.isLogout ? 'alert(\'Logging out...\')' : 'alert(\'Go to ' + item.title + '\')'}" class="flex items-center gap-4 p-4 transition-colors hover:bg-slate-100 dark:hover:bg-dark-surface cursor-pointer">
-                    <div class="w-8 h-8 flex items-center justify-center text-xl text-primary-DEFAULT dark:text-primary-DEFAULT">
-                        <i class="${item.icon} ${item.isLogout ? 'text-red-500' : ''}"></i>
+                <div onclick="${item.isLogout ? 'alert(\'Logging out...\')' : 'alert(\'Go to ' + item.title + '\')'}" class="flex items-center gap-4 p-4 transition-colors hover:bg-slate-50 cursor-pointer">
+                    <div class="w-8 h-8 flex items-center justify-center text-xl" style="color: ${item.isLogout ? 'red' : primaryColor};">
+                        <i class="${item.icon}"></i>
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <h3 class="font-medium ${item.isLogout ? 'text-red-500' : 'text-slate-900 dark:text-dark-text'}">${item.title}</h3>
-                        ${item.subtitle ? `<p class="text-sm text-slate-500 dark:text-gray-400">${item.subtitle}</p>` : ''}
+                        <h3 class="font-medium ${item.isLogout ? 'text-red-500' : 'text-slate-900'}">${item.title}</h3>
+                        ${item.subtitle ? `<p class="text-sm text-slate-500">${item.subtitle}</p>` : ''}
                     </div>
                     ${!item.isLogout ? '<i class="fas fa-chevron-right text-slate-400 text-sm"></i>' : ''}
                 </div>
@@ -240,26 +202,29 @@
 
 
             return `
-                <div class="h-full overflow-y-auto bg-slate-50 dark:bg-dark-bg">
-                    <header class="h-16 flex items-center px-4 bg-white dark:bg-dark-surface border-b border-slate-100 dark:border-gray-700">
-                        <button onclick="switchTab('Chats')" class="p-2 mr-4 text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-dark-surface rounded-full">
+                <div class="h-full overflow-y-auto bg-slate-50">
+                    <header class="h-16 flex items-center px-4 bg-white border-b border-slate-100">
+                        <button onclick="switchTab('Chats')" class="p-2 mr-4 text-slate-600 hover:bg-slate-100 rounded-full">
                             <i class="fas fa-arrow-left"></i>
                         </button>
-                        <h2 class="text-xl font-semibold text-slate-900 dark:text-dark-text">Settings</h2>
+                        <h2 class="text-xl font-semibold text-slate-900">Settings</h2>
+                        <button class="ml-auto p-2 text-slate-600 hover:bg-slate-100 rounded-full">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </header>
                     
-                    <div class="flex items-center gap-4 p-4 mt-2 bg-white dark:bg-dark-surface border-b border-t border-slate-100 dark:border-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-surface">
-                        <div class="h-14 w-14 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
-                            <img src="${userProfile.avatarUrl}" alt="${userProfile.name}" class="h-full w-full object-cover">
+                    <div class="flex items-center gap-4 p-4 mt-2 bg-white border-b border-t border-slate-100 cursor-pointer hover:bg-slate-50">
+                        <div class="h-14 w-14 rounded-full bg-slate-200 overflow-hidden border border-slate-300 flex items-center justify-center text-lg font-bold">
+                             KC
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-slate-900 dark:text-dark-text">${userProfile.name}</h3>
-                            <p class="text-sm text-slate-500 dark:text-gray-400">Hey there! I'm using BongoWide.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">${userProfile.name}</h3>
+                            <p class="text-sm text-slate-500">Hey there! I'm using BongoWide.</p>
                         </div>
-                        <i class="fas fa-qrcode text-primary-DEFAULT text-2xl"></i>
+                        <i class="fas fa-qrcode text-2xl" style="color: ${primaryColor};"></i>
                     </div>
 
-                    <div class="bg-white dark:bg-dark-surface divide-y divide-slate-100 dark:divide-gray-700 mt-4 shadow-sm pb-12">
+                    <div class="bg-white divide-y divide-slate-100 mt-4 shadow-sm pb-12 border-t border-b border-slate-100">
                         ${settingsHtml}
                     </div>
 
@@ -267,127 +232,217 @@
             `;
         }
 
-        // --- APP SCREEN RENDERERS (Updated to use primary-DEFAULT) ---
+        // Other screens (Chats, Updates, Groups, World, Calls) zimebaki kama kwenye jibu lililopita
+        // Ili kupunguza urefu, nitaweka mfano wa Chats screen tu.
 
         function getChatsScreen() {
             const chatsHtml = mockChats.map(chat => `
-                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white dark:hover:bg-dark-surface cursor-pointer">
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white border-b border-slate-100 cursor-pointer">
                     <div class="relative">
                         <img src="${chat.avatarUrl}" alt="${chat.name}" class="h-12 w-12 rounded-full object-cover">
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <h3 class="truncate font-semibold text-slate-900 dark:text-dark-text">${chat.name}</h3>
-                        <p class="truncate text-sm text-slate-500 dark:text-gray-400">
+                        <h3 class="truncate font-semibold text-slate-900">${chat.name}</h3>
+                        <p class="truncate text-sm text-slate-500">
                             ${chat.messages[0]?.text || "No messages"}
                         </p>
                     </div>
-                    <div class="flex flex-col items-end gap-1 text-xs text-slate-500 dark:text-gray-400">
+                    <div class="flex flex-col items-end gap-1 text-xs text-slate-500">
                         <span>${chat.messages[0]?.timestamp || ""}</span>
-                        ${chat.unreadCount > 0 ? `<span class="bg-primary-DEFAULT text-white px-2 py-0.5 rounded-full text-[10px]">${chat.unreadCount}</span>` : ''}
+                        ${chat.unreadCount > 0 ? `<span class="text-white px-2 py-0.5 rounded-full text-[10px]" style="background-color: var(--tw-primary-color);">${chat.unreadCount}</span>` : ''}
                     </div>
                 </div>
             `).join('');
 
             return `
-                <div class="relative h-full bg-white dark:bg-dark-surface">
-                    <div class="h-full overflow-y-auto divide-y divide-slate-100 dark:divide-gray-700 pb-20">
+                <div class="relative h-full bg-white">
+                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
                         ${chatsHtml}
                     </div>
-                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary-DEFAULT text-white flex items-center justify-center hover:opacity-90 transition-transform active:scale-95">
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg text-white flex items-center justify-center hover:opacity-90 transition-transform active:scale-95" style="background-color: var(--tw-primary-color);">
                         <i class="fas fa-comment-medical text-xl"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        // ... (Weka functions zote za getGroupsScreen, getUpdatesScreen, getWorldScreen, getCallsScreen hapa) ...
+        
+        function getGroupsScreen() {
+            // Re-use logic from previous response
+             return `
+                <div class="flex flex-col items-center justify-center h-full text-center p-8 bg-white">
+                    <i class="fas fa-users text-4xl text-slate-300 mb-4"></i>
+                    <h2 class="text-xl font-semibold">Groups Screen</h2>
+                    <p class="text-slate-500 mt-2">Create a group to start chatting.</p>
+                </div>
+            `;
+        }
+
+        function getUpdatesScreen() {
+            // Re-use logic from previous response
+             return `
+                <div class="relative h-full overflow-y-auto bg-slate-50">
+                    <div class="p-4 space-y-8 pb-20">
+                        <div>
+                            <h2 class="text-xl font-bold mb-4">Mood</h2>
+                            <div class="bg-white p-4 rounded-lg shadow-sm w-40 h-40 flex flex-col items-center justify-center border border-slate-200 cursor-pointer">
+                                <div class="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-900 font-bold text-xl relative">
+                                    KC
+                                    <div class="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-green-500 text-white flex items-center justify-center border-2 border-white">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </div>
+                                </div>
+                                <span class="mt-3 text-sm font-medium text-slate-500">Add mood</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold mb-4">Posts za Hivi Karibuni</h2>
+                            <div class="bg-white p-8 rounded-lg shadow-sm h-48 flex items-center justify-center border border-slate-200">
+                                <p class="text-slate-500">Recent posts will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg text-white flex items-center justify-center transition-transform active:scale-95" style="background-color: var(--tw-primary-color);">
+                        <i class="fas fa-plus text-xl"></i>
                     </button>
                 </div>
             `;
         }
 
         function getWorldScreen() {
-            const postsHtml = mockWorldPosts.map(post => `
-                <div class="relative group overflow-hidden rounded-lg bg-slate-200 aspect-square cursor-pointer">
-                    <img src="${post.imageUrl}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-2 text-white">
-                        <p class="text-xs font-semibold truncate">${post.caption}</p>
-                        <p class="text-xs text-white/80">by ${post.user.name}</p>
+            // Re-use logic from previous response
+            const requestHtml = mockFriendRequests.map(request => `
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border-b border-slate-100 bg-white">
+                    <div class="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                        <img src="${request.avatarUrl}" alt="${request.name}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex justify-between items-start w-full">
+                            <h3 class="truncate font-semibold text-slate-900">${request.name}</h3>
+                            <span class="text-xs text-slate-500 whitespace-nowrap">${request.time}</span>
+                        </div>
+                        <p class="text-sm text-slate-500">${request.age} years old • ${request.gender}</p>
+                        <div class="flex gap-2 mt-3 w-full sm:w-auto">
+                            <button class="flex-1 sm:flex-none px-4 py-2 text-white rounded-md font-medium hover:opacity-90 transition-colors active:scale-95" style="background-color: var(--tw-primary-color);">
+                                Confirm
+                            </button>
+                            <button class="flex-1 sm:flex-none px-4 py-2 bg-slate-200 text-slate-900 rounded-md font-medium hover:bg-slate-300 transition-colors active:scale-95">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
 
             return `
-                <div class="h-full overflow-y-auto p-2 bg-slate-50 dark:bg-dark-bg">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 pb-20">
-                        ${postsHtml}
+                <div class="relative h-full bg-slate-50 overflow-y-auto">
+                    <div class="p-4 border-b bg-white flex justify-start space-x-6">
+                        <button class="px-1 py-1 font-semibold border-b-2 text-blue-600" style="border-color: var(--tw-primary-color); color: var(--tw-primary-color);">
+                            Friends
+                        </button>
+                        <button class="px-1 py-1 font-semibold text-slate-500 hover:text-blue-600 hover:border-b-2 hover:border-slate-200 transition-colors">
+                            Partners
+                        </button>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h2 class="text-lg font-semibold mb-3">Friend Requests (${mockFriendRequests.length})</h2>
+                        <div class="rounded-lg shadow-sm overflow-hidden border border-slate-100 divide-y divide-slate-100">
+                            ${requestHtml}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center h-32 mt-4 bg-white mx-4 rounded-lg shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-sm">Your current friends will appear here.</p>
                     </div>
                 </div>
             `;
         }
 
-        // Other screen renderers (Groups, Updates, Calls) pia zinahitaji kurekebishwa kutumia dark mode na primary-DEFAULT. Zimeachwa kwa ufupi kuepuka msimbo mrefu sana.
+        function getCallsScreen() {
+             // Re-use logic from previous response
+            const callContactsHtml = mockCallContacts.map(contact => `
+                <div class="flex items-center gap-4 p-3 border-b border-slate-100 bg-white hover:bg-slate-50 cursor-pointer">
+                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                        <img src="${contact.avatarUrl}" alt="${contact.name}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="truncate font-medium text-slate-900">${contact.name}</h3>
+                    </div>
+                    <button class="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center" style="color: var(--tw-primary-color);">
+                        <i class="fas fa-phone"></i>
+                    </button>
+                    <button class="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center" style="color: var(--tw-primary-color);">
+                        <i class="fas fa-video"></i>
+                    </button>
+                </div>
+            `).join('');
 
-        // --- CORE APP LOGIC ---
+            return `
+                <div class="relative h-full overflow-y-auto bg-slate-50">
+                    <div class="p-4 space-y-6 pb-20">
+                        
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 flex items-center gap-4 cursor-pointer hover:bg-slate-50">
+                            <div class="h-10 w-10 rounded-full text-white flex items-center justify-center shrink-0" style="background-color: var(--tw-primary-color);">
+                                <i class="fas fa-link text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Create call link</h3>
+                                <p class="text-sm text-slate-500">Share a link for your BongoWide call</p>
+                            </div>
+                        </div>
 
-        function toggleAppUI(show) {
-            const header = document.getElementById('app-header');
-            const nav = document.getElementById('app-nav');
-            const main = document.getElementById('app-content');
+                        <h2 class="text-lg font-semibold text-slate-900 pt-2">Recent</h2>
+                        <div class="bg-white p-8 rounded-lg shadow-sm h-32 flex items-center justify-center border border-slate-100">
+                            <p class="text-slate-500">No recent calls</p>
+                        </div>
 
-            if (show) {
-                header.classList.remove('hidden');
-                nav.classList.remove('hidden');
-                main.classList.remove('auth-container');
-                main.classList.add('bg-slate-50');
-            } else {
-                header.classList.add('hidden');
-                nav.classList.add('hidden');
-                main.classList.add('auth-container');
-                main.classList.remove('bg-slate-50');
-            }
+                        <h2 class="text-lg font-semibold text-slate-900 pt-2">Start a call</h2>
+                        <div class="rounded-lg shadow-sm overflow-hidden divide-y divide-slate-100 border border-slate-100">
+                            ${callContactsHtml}
+                        </div>
+
+                    </div>
+                    
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg text-white flex items-center justify-center transition-transform active:scale-95" style="background-color: var(--tw-primary-color);">
+                        <i class="fas fa-phone-alt text-xl"></i>
+                    </button>
+                </div>
+            `;
         }
 
-        function showAuthScreen(screenName) {
-            toggleAppUI(false); 
-            const container = document.getElementById('app-content');
-            
-            switch(screenName) {
-                case 'SignIn':
-                    container.innerHTML = getSignInScreen();
-                    break;
-                case 'SignUp':
-                    container.innerHTML = getSignUpScreen();
-                    break;
-            }
-        }
-
-        function loginSuccess() {
-            toggleAppUI(true); 
-            switchTab('Chats');
-            alert('Umefanikiwa kuingia! Karibu BongoWide.');
-        }
+        // --- 3. APP LOGIC (Switching Tabs) ---
 
         function switchTab(tabName) {
             const container = document.getElementById('app-content');
+            const nav = document.getElementById('app-nav');
+            const header = document.getElementById('app-header');
             const navButtons = document.querySelectorAll('.nav-btn');
             
             // Ficha navigation kwa skrini zisizo za App za kawaida (mfano Settings)
             if (tabName === 'Settings') {
-                document.getElementById('app-nav').classList.add('hidden');
-                document.getElementById('app-header').classList.add('hidden'); // Ficha header pia
+                nav.classList.add('hidden');
+                header.querySelector('button[onclick="switchTab(\'Settings\')"]').classList.add('hidden'); // Ficha profile button
                 container.innerHTML = getSettingsScreen();
                 return;
             } else {
-                document.getElementById('app-nav').classList.remove('hidden');
-                document.getElementById('app-header').classList.remove('hidden');
+                nav.classList.remove('hidden');
+                header.querySelector('button[onclick="switchTab(\'Settings\')"]').classList.remove('hidden'); 
             }
 
-
+            // Update UI Active State for Buttons
             navButtons.forEach(btn => {
                 const icon = btn.querySelector('i');
-                if(btn.id === `nav-${tabName}`) {
-                    btn.classList.add('text-primary-DEFAULT');
+                const isCurrent = btn.id === `nav-${tabName}`;
+                
+                btn.style.color = isCurrent ? 'var(--tw-primary-color)' : '';
+
+                if(isCurrent) {
+                    btn.classList.add('text-blue-600');
                     btn.classList.remove('text-slate-500');
-                    // Kuweka icon kuwa solid kwa tab iliyochaguliwa (Mfano: fas fa-comment-alt-solid)
-                    if (tabName === 'Chats') icon.classList.remove('far'); // mfano
                 } else {
-                    btn.classList.remove('text-primary-DEFAULT');
+                    btn.classList.remove('text-blue-600');
                     btn.classList.add('text-slate-500');
                 }
             });
@@ -398,62 +453,49 @@
                     container.innerHTML = getChatsScreen();
                     break;
                 case 'Updates':
-                    // container.innerHTML = getUpdatesScreen();
-                    container.innerHTML = '<h2>Updates Screen (TODO)</h2>';
+                    container.innerHTML = getUpdatesScreen();
                     break;
                 case 'Groups':
-                    // container.innerHTML = getGroupsScreen();
-                    container.innerHTML = '<h2>Groups Screen (TODO)</h2>';
+                    container.innerHTML = getGroupsScreen();
                     break;
                 case 'World':
                     container.innerHTML = getWorldScreen();
                     break;
                 case 'Calls':
-                    // container.innerHTML = getCallsScreen();
-                    container.innerHTML = '<h2>Calls Screen (TODO)</h2>';
+                    container.innerHTML = getCallsScreen();
                     break;
             }
         }
 
+
         // --- NEW: THEME LOGIC ---
 
         function applyTheme() {
-            // Apply Mode
+            const root = document.documentElement;
+            
+            // Apply Mode (Dark/Light)
             if (themeConfig.mode === 'dark') {
-                document.documentElement.classList.add('dark');
+                root.classList.add('dark');
+                document.querySelector('body').classList.remove('text-slate-900');
             } else {
-                document.documentElement.classList.remove('dark');
+                root.classList.remove('dark');
+                document.querySelector('body').classList.add('text-slate-900');
             }
             localStorage.setItem('theme-mode', themeConfig.mode);
 
             // Apply Color
             const newColor = getColorClass(themeConfig.color);
-            document.documentElement.style.setProperty('--tw-primary-color', newColor);
-            
-            // Hii inatumika ku-refresh Tailwind Config. Kwa dev environment kama hivi, 
-            // lazima tu-reload ukurasa au tuingize style mpya moja kwa moja, 
-            // Lakini kwa kuwa tulitumia `getColorClass` kwenye config awali, 
-            // tutaweka style moja kwa moja kupitia CSS Variable kwa uhakika zaidi.
-            
-            // Replace dynamic color uses (Header Title and Icons)
-            const root = document.querySelector(':root');
             root.style.setProperty('--tw-primary-color', newColor);
-            
-            // Update the header title and nav buttons (Quick fix for live color update)
-            const headerTitle = document.querySelector('#app-header h1');
-            if (headerTitle) headerTitle.style.color = newColor;
-
-            document.querySelectorAll('.nav-btn.text-primary-DEFAULT').forEach(btn => {
-                btn.style.color = newColor;
-            });
-
             localStorage.setItem('theme-color', themeConfig.color);
 
-            // Trigger a re-render of the current tab content to pick up the new Tailwind classes
-            const currentActiveButton = document.querySelector('.nav-btn.text-primary-DEFAULT');
+            // Re-render the current screen to pick up new dynamic colors
+            const currentActiveButton = document.querySelector('.nav-btn.text-blue-600');
             if (currentActiveButton && currentActiveButton.id) {
                 const tabName = currentActiveButton.id.replace('nav-', '');
                 switchTab(tabName);
+            } else {
+                 // Initialize default chat screen if not active
+                 switchTab('Chats');
             }
         }
 
@@ -479,7 +521,9 @@
                 modal.classList.remove('hidden');
                 modal.innerHTML = getThemeModalHtml();
                 // Close when clicking outside
-                document.addEventListener('click', closeThemeModalOutside);
+                setTimeout(() => { // Tunasubiri ili kuzuia kubonyeza button mara mbili
+                    document.addEventListener('click', closeThemeModalOutside);
+                }, 0);
             } else {
                 modal.classList.add('hidden');
                 document.removeEventListener('click', closeThemeModalOutside);
@@ -500,22 +544,23 @@
         function getThemeModalHtml() {
             const colorButtons = colorOptions.map(color => `
                 <button 
-                    onclick="setColor('${color}'); event.stopPropagation();" 
-                    class="w-8 h-8 rounded-full bg-${color.replace('-600', '-500')}"
+                    onclick="setColor('${color}'); event.stopPropagation(); handleThemeToggle();" 
+                    class="w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-transform active:scale-90"
                     style="background-color: ${getColorClass(color)};"
                 >
                     ${themeConfig.color === color ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
                 </button>
             `).join('');
-
+            
+            // Icon for light mode is Sun (fas fa-sun) and dark mode is Moon (fas fa-moon)
             return `
-                <div class="w-64 bg-white dark:bg-dark-surface shadow-xl rounded-lg p-4 border border-slate-200 dark:border-gray-700">
+                <div class="w-64 bg-white dark:bg-black shadow-2xl rounded-lg p-4 border border-slate-200 dark:border-gray-800">
                     <h3 class="font-semibold mb-4 text-slate-900 dark:text-dark-text">Mode</h3>
                     <div class="flex justify-between items-center mb-6">
-                        <button onclick="setMode('light'); event.stopPropagation();" class="flex-1 flex items-center justify-center p-2 rounded-lg ${themeConfig.mode === 'light' ? 'bg-slate-200 dark:bg-dark-surface border border-slate-300 dark:border-gray-600' : 'hover:bg-slate-100 dark:hover:bg-dark-surface'}">
+                        <button onclick="setMode('light'); event.stopPropagation(); handleThemeToggle();" class="flex-1 flex items-center justify-center p-2 rounded-lg transition-colors border ${themeConfig.mode === 'light' ? 'bg-slate-200 dark:bg-gray-700 border-slate-300' : 'hover:bg-slate-100 dark:hover:bg-gray-800 border-transparent'}">
                             <i class="fas fa-sun text-lg mr-2"></i> Light
                         </button>
-                        <button onclick="setMode('dark'); event.stopPropagation();" class="flex-1 flex items-center justify-center p-2 ml-2 rounded-lg ${themeConfig.mode === 'dark' ? 'bg-slate-200 dark:bg-dark-surface border border-slate-300 dark:border-gray-600' : 'hover:bg-slate-100 dark:hover:bg-dark-surface'}">
+                        <button onclick="setMode('dark'); event.stopPropagation(); handleThemeToggle();" class="flex-1 flex items-center justify-center p-2 ml-2 rounded-lg transition-colors border ${themeConfig.mode === 'dark' ? 'bg-slate-200 dark:bg-gray-700 border-slate-300' : 'hover:bg-slate-100 dark:hover:bg-gray-800 border-transparent'}">
                             <i class="fas fa-moon text-lg mr-2"></i> Dark
                         </button>
                     </div>
@@ -527,7 +572,7 @@
                 </div>
             `;
         }
-
+        
         // Initialize App
         document.addEventListener('DOMContentLoaded', () => {
             // Apply theme on load
@@ -539,8 +584,8 @@
                 handleThemeToggle();
             });
 
-            // Start with SignIn Screen
-            showAuthScreen('SignIn'); 
+            // Start with Chats Screen
+            switchTab('Chats');
         });
 
     </script>
