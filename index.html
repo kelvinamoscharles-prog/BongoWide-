@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BongoWide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "#2563eb", // Blue-600 like
+                            foreground: "#ffffff",
+                        },
+                        secondary: {
+                            DEFAULT: "#f1f5f9",
+                            foreground: "#0f172a",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "#f1f5f9",
+                            foreground: "#64748b",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "#ffffff",
+                            foreground: "#020817",
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { background-color: #f8fafc; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <header class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm z-10">
+        <h1 class="text-2xl font-bold text-blue-600">BongoWide</h1>
+        <div class="flex items-center gap-2">
+            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
+                <i class="fas fa-bell text-lg"></i>
+            </button>
+            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
+                <i class="fas fa-search text-lg"></i>
+            </button>
+            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-600">
+                <i class="fas fa-adjust text-lg"></i> </button>
+            <button class="ml-1 h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                <img src="https://i.pravatar.cc/150?u=me" alt="User" class="h-full w-full object-cover">
+            </button>
+        </div>
+    </header>
+
+    <main id="app-content" class="flex-1 overflow-hidden relative bg-slate-50">
+        </main>
+
+    <nav class="flex h-16 items-center justify-around border-t bg-white z-10">
+        <button onclick="switchTab('Chats')" id="nav-Chats" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+            <i class="fas fa-comment-alt text-xl mb-1"></i>
+            <span>Chats</span>
+        </button>
+        <button onclick="switchTab('Updates')" id="nav-Updates" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+            <i class="fas fa-rss text-xl mb-1"></i>
+            <span>Updates</span>
+        </button>
+        <button onclick="switchTab('Groups')" id="nav-Groups" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+            <i class="fas fa-users text-xl mb-1"></i>
+            <span>Groups</span>
+        </button>
+        <button onclick="switchTab('World')" id="nav-World" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+            <i class="fas fa-globe text-xl mb-1"></i>
+            <span>World</span>
+        </button>
+        <button onclick="switchTab('Calls')" id="nav-Calls" class="nav-btn flex h-full flex-1 flex-col items-center justify-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+            <i class="fas fa-phone text-xl mb-1"></i>
+            <span>Calls</span>
+        </button>
+    </nav>
+
+    <script>
+        // --- 1. MOCK DATA (Hii inachukua nafasi ya @/lib/chatverse-data ambayo haipo) ---
+        // Nimetengeneza hii kulingana na variables ulizotumia kwenye components zako.
+        
+        const mockChats = [
+            { id: 1, name: "Juma Jux", type: 'private', avatarUrl: "https://i.pravatar.cc/150?u=1", unreadCount: 2, messages: [{ text: "Mambo vipi kaka?", timestamp: "10:30 AM" }] },
+            { id: 2, name: "Wazee wa Bongo", type: 'group', avatarUrl: "https://i.pravatar.cc/150?u=2", unreadCount: 0, messages: [{ text: "Kikao kipo leo?", timestamp: "Yesterday" }] },
+            { id: 3, name: "Anita", type: 'private', avatarUrl: "https://i.pravatar.cc/150?u=3", unreadCount: 5, messages: [{ text: "Call me ASAP", timestamp: "Yesterday" }] },
+            { id: 4, name: "Tech Talk TZ", type: 'group', avatarUrl: "https://i.pravatar.cc/150?u=4", unreadCount: 10, messages: [{ text: "New React version released", timestamp: "2 days ago" }] }
+        ];
+
+        const mockWorldPosts = [
+            { id: 1, imageUrl: "https://picsum.photos/400/400?random=1", caption: "Sunset in Zanzibar", user: { name: "Asha" } },
+            { id: 2, imageUrl: "https://picsum.photos/400/400?random=2", caption: "Coding setup", user: { name: "DevBaraka" } },
+            { id: 3, imageUrl: "https://picsum.photos/400/400?random=3", caption: "Simba vs Yanga", user: { name: "FanBot" } },
+            { id: 4, imageUrl: "https://picsum.photos/400/400?random=4", caption: "Serengeti Vibes", user: { name: "TravelTz" } },
+            { id: 5, imageUrl: "https://picsum.photos/400/400?random=5", caption: "Coffee time", user: { name: "CafeLover" } },
+        ];
+
+        const mockCalls = [
+            { id: 1, user: { name: "Mama", avatarUrl: "https://i.pravatar.cc/150?u=5" }, type: 'incoming', isVideo: false, timestamp: "Today, 10:00 AM" },
+            { id: 2, user: { name: "Job", avatarUrl: "https://i.pravatar.cc/150?u=6" }, type: 'missed', isVideo: true, timestamp: "Yesterday, 8:30 PM" },
+            { id: 3, user: { name: "Juma Jux", avatarUrl: "https://i.pravatar.cc/150?u=1" }, type: 'outgoing', isVideo: false, timestamp: "Yesterday, 2:00 PM" },
+        ];
+
+        const mockStatusUpdates = [
+            { id: 1, viewed: false, user: { name: "Ben", avatarUrl: "https://i.pravatar.cc/150?u=7" } },
+            { id: 2, viewed: true, user: { name: "Alice", avatarUrl: "https://i.pravatar.cc/150?u=8" } },
+            { id: 3, viewed: false, user: { name: "John", avatarUrl: "https://i.pravatar.cc/150?u=9" } },
+        ];
+
+        // --- 2. SCREEN RENDERERS (Functions to generate HTML strings) ---
+
+        function getChatsScreen() {
+            const chatsHtml = mockChats.map(chat => `
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white border-b border-slate-100 cursor-pointer">
+                    <div class="relative">
+                        <img src="${chat.avatarUrl}" alt="${chat.name}" class="h-12 w-12 rounded-full object-cover">
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="truncate font-semibold text-slate-900">${chat.name}</h3>
+                        <p class="truncate text-sm text-slate-500">
+                            ${chat.messages[0]?.text || "No messages"}
+                        </p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 text-xs text-slate-500">
+                        <span>${chat.messages[0]?.timestamp || ""}</span>
+                        ${chat.unreadCount > 0 ? `<span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]">${chat.unreadCount}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="relative h-full">
+                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
+                        ${chatsHtml}
+                    </div>
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-transform active:scale-95">
+                        <i class="fas fa-comment-medical text-xl"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function getGroupsScreen() {
+            const groups = mockChats.filter(c => c.type === 'group');
+            
+            if(groups.length === 0) {
+                return `
+                    <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                        <i class="fas fa-users text-4xl text-slate-300 mb-4"></i>
+                        <h2 class="text-xl font-semibold">No groups yet</h2>
+                        <p class="text-slate-500 mt-2">Create a group to start chatting.</p>
+                    </div>
+                `;
+            }
+
+            const groupsHtml = groups.map(chat => `
+                <div class="flex items-center gap-4 p-4 transition-colors hover:bg-white border-b border-slate-100 cursor-pointer">
+                    <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <img src="${chat.avatarUrl}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="truncate font-semibold text-slate-900">${chat.name}</h3>
+                        <p class="truncate text-sm text-slate-500">
+                           ${chat.messages[0]?.text || "No messages"}
+                        </p>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                         ${chat.messages[0]?.timestamp || ""}
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="relative h-full">
+                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
+                        ${groupsHtml}
+                    </div>
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
+                        <i class="fas fa-plus text-xl"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function getUpdatesScreen() {
+            const statusHtml = mockStatusUpdates.map(update => `
+                <div class="flex flex-col items-center space-y-1 text-center min-w-[64px]">
+                    <div class="h-16 w-16 rounded-full p-[2px] ${update.viewed ? 'border-2 border-slate-300' : 'border-2 border-blue-600'}">
+                        <img src="${update.user.avatarUrl}" class="h-full w-full rounded-full object-cover border-2 border-white">
+                    </div>
+                    <span class="text-xs w-16 truncate">${update.user.name}</span>
+                </div>
+            `).join('');
+
+            return `
+                <div class="relative h-full overflow-y-auto bg-white">
+                    <div class="p-4 space-y-6 pb-20">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-semibold">Status</h2>
+                                <button class="text-sm text-blue-600">See all</button>
+                            </div>
+                            <div class="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
+                                <div class="flex flex-col items-center space-y-1 min-w-[64px]">
+                                    <div class="relative h-16 w-16">
+                                        <div class="h-full w-full rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center">
+                                            <i class="fas fa-plus text-slate-400"></i>
+                                        </div>
+                                        <div class="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 border-2 border-white">
+                                            <i class="fas fa-plus text-white text-[10px]"></i>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-slate-500">My status</span>
+                                </div>
+                                ${statusHtml}
+                            </div>
+                        </div>
+                        <hr class="border-slate-100">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h2 class="text-lg font-semibold">Channels</h2>
+                                <button class="h-8 w-8 flex items-center justify-center hover:bg-slate-100 rounded-full">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-4 text-center py-8">
+                                <p class="text-slate-400 text-sm">Channels you follow will appear here.</p>
+                                <button class="w-full bg-slate-900 text-white py-2 rounded-md text-sm font-medium">Explore Channels</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getWorldScreen() {
+            const postsHtml = mockWorldPosts.map(post => `
+                <div class="relative group overflow-hidden rounded-lg bg-slate-200 aspect-square cursor-pointer">
+                    <img src="${post.imageUrl}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-2 text-white">
+                        <p class="text-xs font-semibold truncate">${post.caption}</p>
+                        <p class="text-xs text-white/80">by ${post.user.name}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="h-full overflow-y-auto p-2 bg-slate-50">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 pb-20">
+                        ${postsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCallsScreen() {
+            const callsHtml = mockCalls.map(call => {
+                let icon = '';
+                let color = '';
+                if(call.type === 'incoming') { icon = 'fa-arrow-down'; color = 'text-green-500 rotate-45'; }
+                else if(call.type === 'outgoing') { icon = 'fa-arrow-up'; color = 'text-blue-500 rotate-45'; }
+                else { icon = 'fa-phone-slash'; color = 'text-red-500'; } // Missed
+
+                return `
+                <div class="flex items-center gap-4 p-4 border-b border-slate-100 bg-white">
+                    <img src="${call.user.avatarUrl}" class="h-12 w-12 rounded-full object-cover">
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="truncate font-semibold ${call.type === 'missed' ? 'text-red-500' : 'text-slate-900'}">${call.user.name}</h3>
+                        <div class="flex items-center gap-1 text-sm text-slate-500">
+                            <i class="fas ${icon} ${color} text-xs"></i>
+                            <span>${call.timestamp}</span>
+                        </div>
+                    </div>
+                    <button class="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-blue-600">
+                        <i class="fas ${call.isVideo ? 'fa-video' : 'fa-phone'}"></i>
+                    </button>
+                </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="relative h-full">
+                    <div class="h-full overflow-y-auto divide-y divide-border pb-20">
+                        <div class="p-4">
+                            <button class="w-full bg-blue-600 text-white py-2 rounded-full font-medium shadow-sm active:scale-95 transition-transform">Create call link</button>
+                        </div>
+                        <h2 class="px-4 py-2 text-sm font-semibold text-slate-500 bg-slate-50">Recent</h2>
+                        ${callsHtml}
+                    </div>
+                    <button class="absolute bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700">
+                        <i class="fas fa-phone-alt text-xl"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        // --- 3. APP LOGIC (Switching Tabs) ---
+
+        function switchTab(tabName) {
+            const container = document.getElementById('app-content');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            
+            // Update UI Active State for Buttons
+            navButtons.forEach(btn => {
+                if(btn.id === `nav-${tabName}`) {
+                    btn.classList.add('text-blue-600');
+                    btn.classList.remove('text-slate-500');
+                } else {
+                    btn.classList.remove('text-blue-600');
+                    btn.classList.add('text-slate-500');
+                }
+            });
+
+            // Inject Content based on Tab
+            switch(tabName) {
+                case 'Chats':
+                    container.innerHTML = getChatsScreen();
+                    break;
+                case 'Updates':
+                    container.innerHTML = getUpdatesScreen();
+                    break;
+                case 'Groups':
+                    container.innerHTML = getGroupsScreen();
+                    break;
+                case 'World':
+                    container.innerHTML = getWorldScreen();
+                    break;
+                case 'Calls':
+                    container.innerHTML = getCallsScreen();
+                    break;
+            }
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('Chats'); // Default tab
+        });
+
+    </script>
+</body>
+</html>
